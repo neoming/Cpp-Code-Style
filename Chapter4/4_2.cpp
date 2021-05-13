@@ -4,18 +4,18 @@
 class Vehicle
 {
     char *plate;
-
-protected:
-    virtual char *vtype() = 0;
+    char *vtype;
 
 public:
-    Vehicle()
+    Vehicle(char *vt)
     {
         plate = NULL;
+        vtype = vt;
     }
 
-    Vehicle(char *p)
+    Vehicle(char *p, char *vt)
     {
+        vtype = vt;
         plate = new char[strlen(p) + 1];
         strcpy(plate, p);
     }
@@ -29,37 +29,28 @@ public:
     {
         if (plate)
         {
-            printf("%s with plate %s\n", vtype(), plate);
+            printf("%s with plate %s\n", vtype, plate);
         }
         else
         {
-            printf("%s with plate <none>\n", vtype());
+            printf("%s with plate <none>\n", vtype);
         }
     }
 };
 
 class Car : public Vehicle
 {
-    char *vtype()
-    {
-        return "car";
-    }
 
 public:
-    Car() : Vehicle() {}
-    Car(char *p) : Vehicle(p) {}
+    Car() : Vehicle("car") {}
+    Car(char *p) : Vehicle(p, "car") {}
 };
 
 class Truck : public Vehicle
 {
-    char *vtype()
-    {
-        return "truck";
-    }
-
 public:
-    Truck() : Vehicle() {}
-    Truck(char *p) : Vehicle(p) {}
+    Truck() : Vehicle("truck") {}
+    Truck(char *p) : Vehicle(p,"truck") {}
 };
 
 class Garage
