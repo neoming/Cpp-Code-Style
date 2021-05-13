@@ -28,7 +28,14 @@ public:
     Car(char *p) : Vehicle(p) {}
     void identify()
     {
-        printf("car with plate %s\n", plate);
+        if (plate)
+        {
+            printf("car with plate %s\n", plate);
+        }
+        else
+        {
+            printf("car with plate <none>\n");
+        }
     }
 };
 
@@ -40,7 +47,14 @@ public:
 
     void identify()
     {
-        printf("truck with plate %s\n", plate);
+        if(plate)
+        {
+            printf("truck with plate %s\n", plate);
+        }
+        else
+        {
+            printf("truck with plate <none>\n");
+        }
     }
 };
 
@@ -78,20 +92,20 @@ public:
         return -1;
     }
 
-    Vehicle* release(int bay)
+    Vehicle *release(int bay)
     {
-        if(bay<0||bay>=maxVehicles)
+        if (bay < 0 || bay >= maxVehicles)
             return NULL;
-        Vehicle* vec = parked[bay];
+        Vehicle *vec = parked[bay];
         parked[bay] = NULL;
         return vec;
     }
 
     void listVehicles()
     {
-        for(int bay = 0;bay<maxVehicles;++bay)
+        for (int bay = 0; bay < maxVehicles; ++bay)
         {
-            if(parked[bay] != NULL)
+            if (parked[bay] != NULL)
             {
                 printf("Vehicle in bay %d is: ", bay);
                 parked[bay]->identify();
