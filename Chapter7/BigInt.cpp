@@ -31,7 +31,11 @@ void BigInt::operator=(const BigInt & n) {
     if(this == &n)return;
     delete []digits;
     unsigned  i = n.ndigits;
-    digits = new char[ndigits = i];
+    if(ndigits != i){
+        delete []  digits;
+        digits = new char[i];
+    }
+    ndigits = i;
     char*p = digits;
     char*q = n.digits;
     while (i--)
