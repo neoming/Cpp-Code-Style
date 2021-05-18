@@ -3,94 +3,111 @@
 class BigInt{
     char * digits;
     unsigned ndigits;
-    BigInt()(char*d , unsigned n){
-        digits = d;
-        ndigits = n;
-    }
-    char fetch(int i)const{
-        return i < ndigits? digits[i] : 0;
-    }
-
+    unsigned size;
+    BigInt(const BigInt& , const BigInt&);
+    char fetch(int i)const;
 public:
     BigInt(const char*);
-    BigInt(unsigned n = 0);
+    BigInt(unsigned = 0);
     BigInt(const BigInt&);
-    void operator=(const BigInt&);
-    BigInt operator+(const BigInt&) const;
-    void print(FILE* f = stdout) const;
-    ~BigInt(){delete [] digits;}
+    BigInt& operator=(const BigInt&);
+    BigInt& operator+=(const BigInt&);
+    friend BigInt operator+(const BigInt&, const BigInt&);
+    void print(FILE* = stdout) const;
+    ~BigInt();
 };
 
-void BigInt::print(int *f) const {
-    for(int i = ndigits-1;i>=0;i--){
+BigInt::~BigInt() {
+    delete [] digits;
+}
+
+inline
+char BigInt::fetch(int i) const {
+    return i < ndigits ? digits[i] : 0;
+}
+
+inline
+BigInt operator+(const BigInt& left, const BigInt& right){
+    return BigInt(left,right);
+}
+
+BigInt& BigInt::operator+=(const BigInt &rhs) {
+    unsigned max = 1 + (rhs.ndigits < ndigits
+                            ? rhs.ndigits : ndigits);
+
+    if (size < max){
+        char *d = new char[size = max];
+        for(int i = 0; i < ndigits; ++i)
+            d[i] = digits[i];
+        delete[]digits;
+        digits = d;
+    }
+    while (ndigits<max)
+        digits[ndigits++] = 0;
+    for(int i = 0;i<ndigits;++i){
+        digits[i] += rhs.fetch(i);
+        if(digits[i] >= 10){
+            digits[i] -= 10;
+            digits[i+1] = 1;
+        }
+    }
+    if(digits[ndigits-1] == 0)
+        --ndigits;
+    return *this;
+}
+
+void BigInt::print(FILE *f) const {
+    for(int i = ndigits - 1; i>=0;i--){
         fprintf(f,"%c",digits[i]+'0');
     }
 }
 
-void BigInt::operator=(const BigInt & n) {
-    if(this == &n)return;
-    delete []digits;
-    unsigned  i = n.ndigits;
-    if(ndigits != i){
-        delete []  digits;
-        digits = new char[i];
+BigInt& BigInt::operator=(const BigInt &rhs) {
+    if(this == &rhs)
+        return *this;
+    ndigits = rhs.ndigits;
+    if( ndigits > size){
+        delete [] digits;
+        digits = new char[size=ndigits];
     }
-    ndigits = i;
-    char*p = digits;
-    char*q = n.digits;
-    while (i--)
-        *p++ = *q++;
-}
-
-BigInt BigInt::operator+(const BigInt &n) const {
-    unsigned maxDigits =
-            (ndigits > n.ndigits ? ndigits:n.ndigits)+1;
-    char* sumPtr = new char[maxDigits];
-    BigInt sum(sumPtr,maxDigits);
-    unsigned carry = 0;
-    for(int i = 0;i<maxDigits;i++){
-        *sumPtr = fetch(i) + n.fetch(i) +carry;
-        if(*sumPtr >= 10){
-            carry = 1;
-            *sumPtr -= 10;
-        }else carry = 0;
-        sumPtr++;
+    for(int i = 0;i< ndigits;++i){
+        digits[i] = rhs.digits[i];
     }
-    if (sum.digits[maxDigits-1] == 0)
-        --sum.ndigits;
-    return sum;
+    return *this;
 }
 
-BigInt::BigInt(unsigned n){
-    char d[3*sizeof(unsigned ) + 1];
-    char* dp = d;
-    ndigits = 0;
-    do{
-        *dp++ = n%10;
-        n /= 10;
-        ndigits++;
-    } while (n>0);
-    digits = new char[ndigits];
-    for(int i = 0;i<ndigits;i++)digits[i] = d[i];
+BigInt::BigInt(const BigInt & left, const BigInt & right) {
+    size = 1 + (left.ndigits > right.ndigits
+                    ? left.ndigits : right.ndigits);
+    digits = new char[size];
+    ndigits = left.ndigits;
+    for(int i = 0;i<ndigits;++i)
+        digits[i] = left.digits[i];
+    *this += right;
 }
 
-BigInt::BigInt(const BigInt & n) {
-    unsigned i = n.digits;
-    digits = new char[ndigits=i];
-    char*p = digits;
-    char*q = n.digits;
-    while (i--) *p++ = *q++;
-}
-
-BigInt::BigInt(const char * digitString) {
-    unsigned n = strlen(digitString);
-    if(n!=0){
-        digits = new char [ndigits=n];
-        char*p = digits;
-        const char* q = &digitString[n];
-        while (n--) *p++ = *--q -'0';
-    }else{
-        digits = new char[ndigits=1];
-        digits[0] = 0;
+BigInt::BigInt(unsigned int n) {
+    unsigned v = u;
+    for(ndigits = 1;(v/=10)>0;++ndigits);
+    digits = new char[size = ndigits];
+    for(int i = 0;i<ndigits;++i){
+        digits[i] = u%10;
+        u /= 10;
     }
+}
+
+BigInt::BigInt(const BigInt& copyFrom){
+    size = ndigits = copyFrom.ndigits;
+    digits = new char[size];
+    for(int i = 0;i<ndigits;++i)
+        digits[i] = copyFrom.digits[i];
+}
+
+BigInt::BigInt(const char *s) {
+    if(s[0] == '\0')
+        s = "0";
+    size = ndigits = strlen(s);
+    digits = new char[size];
+    for(int i = 0;i<ndigits;++i)
+        digits[i] = s[ndigits-1-i]-'0';
 }
