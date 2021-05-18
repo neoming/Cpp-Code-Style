@@ -7,8 +7,9 @@ class BigInt{
         digits = d;
         ndigits = n;
     }
-
-    friend class DigitStream;
+    char fetch(int i)const{
+        return i < ndigits? digits[i] : 0;
+    }
 
 public:
     BigInt(const char*);
@@ -18,22 +19,6 @@ public:
     BigInt operator+(const BigInt&) const;
     void print(FILE* f = stdout) const;
     ~BigInt(){delete [] digits;}
-};
-class DigitStream{
-    char * dp;
-    unsigned nd;
-public:
-    DigitStream(const BigInt& n){
-        dp = n.digits;
-        nd = n.ndigits;
-    }
-    unsigned operator++(){
-        if(nd == 0) return 0;
-        else{
-            nd--;
-            return *dp++;
-        }
-    }
 };
 
 void BigInt::print(int *f) const {
@@ -58,12 +43,9 @@ BigInt BigInt::operator+(const BigInt &n) const {
             (ndigits > n.ndigits ? ndigits:n.ndigits)+1;
     char* sumPtr = new char[maxDigits];
     BigInt sum(sumPtr,maxDigits);
-    DigitStream a(*this);
-    DigitStream b(n);
-    unsigned i = maxDigits;
     unsigned carry = 0;
-    while (i--){
-        *sumPtr = (++a) + (++b) + carry;
+    for(int i = 0;i<maxDigits;i++){
+        *sumPtr = fetch(i) + n.fetch(i) +carry;
         if(*sumPtr >= 10){
             carry = 1;
             *sumPtr -= 10;
