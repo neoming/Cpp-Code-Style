@@ -52,6 +52,8 @@ BigInt BigInt::operator+(const BigInt &n) const {
         }else carry = 0;
         sumPtr++;
     }
+    if (sum.digits[maxDigits-1] == 0)
+        --sum.ndigits;
     return sum;
 }
 
